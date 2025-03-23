@@ -1,94 +1,242 @@
 import streamlit as st
-import requests
 from pathlib import Path
-import json
 
-# Constants
-API_URL = "http://localhost:8000/predict"
-ALLOWED_EXTENSIONS = {'.jpg', '.jpeg'}
+# Set page config with dark theme
+st.set_page_config(
+    page_title="Bone Scan Analyzer",
+    page_icon="🔬",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-def is_valid_file(filename: str) -> bool:
-    """Check if file has allowed extension"""
-    return Path(filename).suffix.lower() in ALLOWED_EXTENSIONS
+# Custom CSS for dark theme styling
+st.markdown("""
+<style>
+/* Dark theme colors */
+:root {
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --bg-card: #252525;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --accent-primary: #4f6df5;
+    --accent-secondary: #3a56d4;
+    --border-color: #333333;
+}
 
-def main():
-    st.set_page_config(
-        page_title="Bone Scan Analyzer",
-        page_icon="🔬",
-        layout="wide"
-    )
-    
-    st.title("Bone Scan Analyzer")
-    
-    # Information section
-    with st.expander("About this project", expanded=True):
-        st.markdown("""
-        ## Bone Metastasis Detection using AI
-        
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
-        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis 
-        nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-        
-        ### Model Performance
-        - Accuracy: 88.10%
-        - Sensitivity: 73.71%
-        - Specificity: 96.34%
-        - F1 Score: 81.85%
-        - AUC: 89.13%
-        
-        ### How it works
-        1. Upload a whole-body bone scan image
-        2. Our AI system analyzes specific regions of interest
-        3. Get instant results about potential bone metastasis
-        """)
-    
-    # File upload section
-    st.header("Upload Bone Scan")
-    uploaded_file = st.file_uploader(
-        "Drag and drop a whole-body bone scan image",
-        type=['jpg', 'jpeg']
-    )
-    
-    if uploaded_file:
-        if not is_valid_file(uploaded_file.name):
-            st.error("Please upload a JPG image file")
-            return
-            
-        # Display uploaded image
-        st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
-        
-        # Process button
-        if st.button("Analyze Image"):
-            with st.spinner("Analyzing image..."):
-                try:
-                    files = {"file": uploaded_file}
-                    response = requests.post(API_URL, files=files)
-                    response.raise_for_status()
-                    result = response.json()
-                    
-                    # Display results
-                    st.success("Analysis Complete!")
-                    
-                    col1, col2, col3 = st.columns(3)
-                    
-                    with col1:
-                        st.metric(
-                            "Metastasis Probability",
-                            f"{result['probability_positive']:.1%}"
-                        )
-                    
-                    with col2:
-                        st.metric(
-                            "Normal Probability",
-                            f"{result['probability_negative']:.1%}"
-                        )
-                        
-                    with col3:
-                        prediction = "Positive" if result['prediction'] > 0.5 else "Negative"
-                        st.metric("Final Prediction", prediction)
-                        
-                except requests.exceptions.RequestException as e:
-                    st.error(f"Error analyzing image: {str(e)}")
+/* Override Streamlit's default styles for dark theme */
+.stApp {
+    background-color: var(--bg-primary);
+}
 
-if __name__ == "__main__":
-    main() 
+.header-container {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--border-color);
+}
+
+.header-title {
+    color: var(--text-primary);
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.header-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+}
+
+.main-content {
+    padding: 2rem;
+    background-color: var(--bg-secondary);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    margin-top: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.feature-card {
+    background-color: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    border: 1px solid var(--border-color);
+    height: 100%;
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    color: var(--text-primary);
+}
+
+.feature-card h3 {
+    color: var(--text-primary);
+}
+
+.feature-card p, .feature-card ul {
+    color: var(--text-secondary);
+}
+
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--accent-primary);
+}
+
+.cta-button {
+    background-color: var(--accent-primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 1.5rem;
+    border: none;
+    cursor: pointer;
+}
+
+.cta-button:hover {
+    background-color: var(--accent-secondary);
+}
+
+/* Override Streamlit text colors */
+h1, h2, h3, h4, h5, h6, .stMarkdown {
+    color: var(--text-primary) !important;
+}
+
+p, li {
+    color: var(--text-secondary) !important;
+}
+
+/* Make sure buttons are visible in dark mode */
+.stButton button {
+    background-color: var(--accent-primary);
+    color: white;
+    border: none;
+}
+
+.stButton button:hover {
+    background-color: var(--accent-secondary);
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Custom header
+st.markdown("""
+<div class="header-container">
+    <div>
+        <h1 class="header-title">Bone Scan Analyzer</h1>
+        <p class="header-subtitle">AI-powered detection of bone metastasis</p>
+    </div>
+    <div>🔬</div>
+</div>
+""", unsafe_allow_html=True)
+
+# Hero section
+col1, col2 = st.columns([3, 2])
+
+with col1:
+    st.markdown("""
+    # Detect Bone Metastasis with AI
+    
+    Our advanced AI system analyzes whole-body bone scans to detect potential metastatic lesions with high accuracy.
+    
+    The Bone Scan Analyzer uses deep learning and computer vision to identify patterns that may indicate the presence of bone metastasis, helping clinicians make more informed decisions.
+    """)
+    
+    # Call to action button
+    if st.button("Start Analyzing", type="primary"):
+        # Redirect to the analyzer page
+        st.switch_page("pages/analyzer.py")
+
+
+# Features section
+st.markdown("## Key Features")
+
+feat_col1, feat_col2, feat_col3 = st.columns(3)
+
+with feat_col1:
+    st.markdown("""
+    <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>High Accuracy</h3>
+        <p>Our model achieves:</p>
+        <ul>
+            <li>88.10% Accuracy</li>
+            <li>73.71% Sensitivity</li>
+            <li>96.34% Specificity</li>
+            <li>81.85% F1 Score</li>
+            <li>89.13% AUC</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+with feat_col2:
+    st.markdown("""
+    <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Fast Analysis</h3>
+        <p>Get results in seconds:</p>
+        <ul>
+            <li>Upload your scan</li>
+            <li>Automatic region detection</li>
+            <li>Instant probability scores</li>
+            <li>Clear visual indicators</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+with feat_col3:
+    st.markdown("""
+    <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>Advanced Technology</h3>
+        <p>Powered by state-of-the-art AI:</p>
+        <ul>
+            <li>Deep learning feature extraction</li>
+            <li>ResNet34 architecture</li>
+            <li>Random Forest classification</li>
+            <li>Region-specific analysis</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+# How it works section
+st.markdown("## How It Works")
+
+step_col1, step_col2, step_col3 = st.columns(3)
+
+with step_col1:
+    st.markdown("### 1. Upload")
+    st.markdown("Upload a whole-body bone scan image in JPG format.")
+
+with step_col2:
+    st.markdown("### 2. Analyze")
+    st.markdown("Our AI system analyzes specific regions of interest in the scan.")
+
+with step_col3:
+    st.markdown("### 3. Results")
+    st.markdown("Get instant results about potential bone metastasis with probability scores.")
+
+# Call to action
+st.markdown("""
+<div style="text-align: center; margin-top: 2rem;">
+    <h2>Ready to analyze your bone scans?</h2>
+</div>
+""", unsafe_allow_html=True)
+
+# Call to action button - centered
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    if st.button("Go to Analyzer", type="primary", use_container_width=True):
+        # Redirect to the analyzer page
+        st.switch_page("pages/analyzer.py")
+
+st.markdown('</div>', unsafe_allow_html=True) 

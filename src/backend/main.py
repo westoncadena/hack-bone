@@ -152,7 +152,6 @@ async def predict(file: UploadFile = File(...)):
         logger.info("Making prediction with random forest classifier...")
         try:
             logger.info(f"RF classifier type: {type(rf_classifier)}")
-            logger.info(f"RF classifier methods: {dir(rf_classifier)}")
             
             # Check if the model has the expected methods
             if hasattr(rf_classifier, 'predict_proba'):
@@ -172,7 +171,6 @@ async def predict(file: UploadFile = File(...)):
             logger.error(f"Error during prediction: {str(e)}")
             logger.error(f"Feature shape: {combined_features.shape}")
             logger.error(f"RF classifier type: {type(rf_classifier)}")
-            logger.error(f"RF classifier methods: {dir(rf_classifier)}")
             logger.error(f"Traceback: {traceback.format_exc()}")
             
             # You can also write to a file for debugging
@@ -180,7 +178,6 @@ async def predict(file: UploadFile = File(...)):
                 f.write(f"Error during prediction: {str(e)}\n")
                 f.write(f"Feature shape: {combined_features.shape}\n")
                 f.write(f"RF classifier type: {type(rf_classifier)}\n")
-                f.write(f"RF classifier methods: {dir(rf_classifier)}\n")
                 f.write(f"Traceback: {traceback.format_exc()}\n")
             
             raise HTTPException(
@@ -188,10 +185,12 @@ async def predict(file: UploadFile = File(...)):
                 detail=f"Error during prediction: {str(e)}"
             )
         
+        # Return prediction results along with region paths
         return {
             "prediction": float(prediction[1]),
             "probability_negative": float(prediction[0]),
-            "probability_positive": float(prediction[1])
+            "probability_positive": float(prediction[1]),
+            "region_paths": region_paths  # Include region paths in the response
         }
         
     except Exception as e:

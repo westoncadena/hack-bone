@@ -34,7 +34,7 @@ def get_region_paths(filename):
     # For each region, check the corresponding directory
     for region in SELECTED_REGIONS:
         # Construct the path to the region-specific directory
-        region_dir = Path(f"data/images/{region}")
+        region_dir = Path(f"data/images/temp/{region}")
         logger.info(f"Looking in directory: {region_dir}")
         
         # Check if the directory exists
